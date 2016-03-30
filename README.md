@@ -4,16 +4,19 @@ This is a website that is designed to work in conjunction with OpenStack as a si
 ##Word of Caution. 
 This project is still in development.  I will indicate what is functional below:
 Website:
-- Project Creation
-- User Creation
-- Keypair Creation
-- Network Creation
-- Router Creation
+- Infrastructure is completely functional including:
+ - Project & user creation
+ - Keypair creation
+ - Networking creation
+ - Subnet creation
+ - router creation
+ - linkage between subnet, router, and world
+ - spawning n instances
+ 
 
 Cloudrain.py
-- All functions work properly except for:
-
-* Connecting interfaces to network and router
+- All functions work properly.
+- Infrastructure deploys successfully and creates instances.
 
 
 **Requirements:**
@@ -21,8 +24,14 @@ Cloudrain.py
 
 ##How to deploy?
 * Copy all files to the /var/www/
-* Update insert_record & main.py with credentials
+* Deploy cloud database.
+* Update insert_record.php, cloudrain.py, and main.py with credentials
 
+##Current workflow:
+![flowchart.pdf](https://github.com/JamesOBenson/Cloud-RAIN/docs/flowchart.pdf)
+*Figure 1: Flowchart*
+
+Deployment of additional software over infrastructure is being developed and will be added into the flowchart once completed.
 
 ##How is this playbook licensed?
 
