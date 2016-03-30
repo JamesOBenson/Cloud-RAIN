@@ -28,7 +28,7 @@ Cloudrain.py
 * Update insert_record.php, cloudrain.py, and main.py with credentials
 
 ##Current workflow:
-![flowchart.pdf](https://github.com/JamesOBenson/Cloud-RAIN/docs/flowchart.pdf)
+![flowchart.pdf](https://github.com/JamesOBenson/Cloud-RAIN/blob/master/docs/flowchart.pdf)
 *Figure 1: Flowchart*
 
 Deployment of additional software over infrastructure is being developed and will be added into the flowchart once completed.
