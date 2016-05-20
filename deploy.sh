@@ -2,8 +2,14 @@ function deployDB () {
     echo ""
     echo "Adding the Cloud Database and BigTable and LookUp tables."
     echo ""
-    mysql -u root -p << EOF   
+    {
+    mysql -u root -p << EOF
     DROP DATABASE Cloud;
+EOF
+    } || {
+    echo "Cloud Database does not exist, continuing..."
+    }
+    mysql -u root -p << EOF   
     CREATE DATABASE Cloud;
     USE Cloud;
     CREATE TABLE BigTable(
