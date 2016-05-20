@@ -60,9 +60,9 @@ function copywebsite(){
 
 function installSoftware(){
     echo ""
-    echo "Install libapache2-mod-php5 & php5-mysql"
+    echo "Install libapache2-mod-php5 & php5-mysql python-(keystone, nova, neutron, openstack) client"
     echo ""
-    apt-get install -y libapache2-mod-php5 php5-mysql
+    apt-get install -qqy libapache2-mod-php5 php5-mysql python-keystoneclient python-novaclient python-neutronclient python-openstackclient
     service apache2 restart
 }
 
