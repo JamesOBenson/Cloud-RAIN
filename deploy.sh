@@ -78,10 +78,11 @@ function usage (){
     echo ""
     echo "Usage: $0 {Any of the options below}"
     echo ""
-    echo " deploy_all <database password>"
+    echo " deploy_all"
     echo "     - Will run all of the commands below and set up the website for DevStack  - must be run on controller node(s)"
-    echo " deployDB <database password>"
+    echo " deployDB"
     echo " copywebsite"
+    echo " installSoftware"
     echo " enableWebsite"
     echo ""
 }
@@ -100,13 +101,6 @@ function main() {
           copywebsite
           installSoftware
           enableWebsite
-#    if [ -z $2 ]; then
-#       echo ""
-#       echo "Missing the database password"
-#       echo ""
-#       usage 
-#       exit 1
-#    fi
     else
       case $1 in 
          "deployDB")
