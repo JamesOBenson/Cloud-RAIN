@@ -49,6 +49,9 @@ EOF
 }
 
 function copywebsite(){
+    echo ""
+    echo "Copying website to /var/www/Cloud-RAIN"
+    echo ""
     sudo mkdir /var/www/Cloud-RAIN
     sudo cp *.py /var/www/Cloud-RAIN
     sudo cp *.html /var/www/Cloud-RAIN
@@ -56,11 +59,19 @@ function copywebsite(){
 }
 
 function installSoftware(){
+    echo ""
+    echo "Install libapache2-mod-php5 & php5-mysql"
+    echo ""
     apt-get install -y libapache2-mod-php5 php5-mysql
     service apache2 restart
 }
 
 function enableWebsite(){
+    echo ""
+    echo "Enabling website (modifying /etc/apache2/sites-available/000-default.conf"
+    echo "                            /etc/apache2/ports.conf"
+    echo "                            /etc/apache2/apache2.conf" 
+    echo ""
     echo "<VirtualHost *:81>" >> /etc/apache2/sites-available/000-default.conf 
     echo "    DocumentRoot "/var/www/Cloud-RAIN"" >> /etc/apache2/sites-available/000-default.conf 
     echo "    ServerName site1" >> /etc/apache2/sites-available/000-default.conf 
