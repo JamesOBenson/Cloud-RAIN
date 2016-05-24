@@ -23,13 +23,19 @@ Cloudrain.py
 * Ansible
 
 ##How to deploy?
-* Copy all files to the /var/www/
-* Deploy cloud database.
-* Update insert_record.php, cloudrain.py, and main.py with credentials
+* git clone https://github.com/JamesOBenson/Cloud-RAIN.git
+* ./deploy.sh deploy_all
+* Update /var/www/Cloud-rain/cloudrain.py with openstack credentials (will be updated in the future) and externalGateway ID (Shown in Figure 1)
+* Update /var/www/Cloud-rain/insert_record.php with mySQL database credentials (will be updated in the future)
+* Update /var/www/Cloud-rain/main.py with mySQL database credentials and instance ID, instance name exactly as from openstack image name  
+* Once deployed, the website is visible under:  http://\<devstack IP\>:81/Cloud-RAIN/
+
+![alt tag](https://github.com/JamesOBenson/Cloud-RAIN/blob/master/docs/NetworkID.png)
+*Figure 1: OpenStack Network Details indicating public network ID*
 
 ##Current workflow:
-![flowchart.pdf](https://github.com/JamesOBenson/Cloud-RAIN/blob/master/docs/flowchart.pdf)
-*Figure 1: Flowchart*
+![flowchart.jpg](https://github.com/JamesOBenson/Cloud-RAIN/blob/master/docs/flowchart.jpg)
+*Figure 2: Flowchart*
 
 Deployment of additional software over infrastructure is being developed and will be added into the flowchart once completed.
 
