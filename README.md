@@ -23,6 +23,7 @@ Cloudrain.py
 * Ansible
 
 ##How to deploy?
+* In openstack, create a m1.xlarge instance and use [my cloud-init script](https://github.com/JamesOBenson/cloud-init) to deploy a new liberty devstack instance with neutron.
 * git clone https://github.com/JamesOBenson/Cloud-RAIN.git
 * ./deploy.sh deploy_all
 * Update /var/www/Cloud-rain/cloudrain.py with openstack credentials (will be updated in the future) and externalGateway ID (Shown in Figure 1)
