@@ -11,13 +11,13 @@ from openstackclient.network.v2 import network as osnet
 import novaclient as ns
 from neutronclient.v2_0 import client as qclient
 
-#  This is the network ID where the Floating IP's originate from "admin_floating_net"
-externalGateway = '3a58479c-aa8f-4944-ba30-89361e88a13e'
+#  This is the network ID where the Floating IP's originate from "admin_floating_net" or "public" in devstack
+externalGateway = '93ac6df3-f4e9-4299-ac5f-26a147b17c9f'
 
 username='admin'
 password='password'
 tenant_name='admin'
-auth_url='http://192.168.0.2:5000/v2.0'
+auth_url='http://192.168.0.24:5000/v2.0'
 
 
 keystone = client.Client(username=username, 
@@ -251,3 +251,14 @@ def CreateSubnetRouterLink(routerid,subnetid ):
         print("Subnet-router link created ...")
     except:
         print("WARNING: SUBNET-ROUTER LINK CREATION FAILED. ")
+
+def AllocateIP(tenantID,externalGateway=externalGateway):
+    floaters = {'tenant_id': tenantID,
+                'floating_network_id': externalGateway}
+    ip = neutron.create_floatingip({'floatingip': floaters})
+    IPaddr = ip.get('floatingip').get('floating_ip_address')
+    IPaddrID = ip.get('floatingip').get('id')
+#    print(ip)
+    print("INFO: ", IPaddr, "has been allocated.")
+#    print(IPaddrID)
+    return IPaddr,IPaddrID

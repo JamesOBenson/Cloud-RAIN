@@ -113,6 +113,7 @@ else:
 FL = cloudrain.flavor(FlavorSize)
 IM = cloudrain.image(Platform_name)
 cloudrain.CreateInstances(nInstance, FL, IM, UserID, networkID, UserID, UserIDPass, UserID)
+cloudrain.AllocateIP(TenantID)
 
 AnsibleScript = """
 # 
