@@ -143,24 +143,32 @@ def Login(user,password,tenant,authURL=auth_url):
 
 
 def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tenant,authURL=auth_url):
-    try:
-        no_of_inst = int(no_of_inst)
-        cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
-        nicsInfo = [{'net-id':networkID}]
-        for n in range(0, no_of_inst):
-              name_vars = [str(n), '-', cur_time]
-              server_name = ''.join(name_vars)
-              nt2 = Login(user,password,tenant,authURL)
-              instance = nt2.servers.create(server_name, flavor=myfl, image=myim, key_name=mykey, nics=nicsInfo)
-              print("Info: Server ",n, " created.")
+    no_of_inst = int(no_of_inst)
+    cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
+    nicsInfo = [{'net-id':networkID}]
+    for n in range(0, no_of_inst):
+        name_vars = [str(n), '-', cur_time]
+        server_name = ''.join(name_vars)
+        nt2 = Login(user,password,tenant,authURL)
+        try:
+                instance = nt2.servers.create(server_name, flavor=myfl, image=myim, key_name=mykey, nics=nicsInfo)
+                print("Info: Server ",n, " created.")
+        except:
+                print("ERROR: Cannot create server(s)")
+        try:
+                tenantID = GetTenantID(tenant)
+                print("CreateInstances: tenantID variable: ", tenantID)
+                IPaddr = str(AllocateIP(tenantID,gateway))
+                print("CreateInstances: IPaddr variable: ", IPaddr)
+                AssignFloatingIP(IPaddr,server_name ,user, password, user)
+        except:
+                print("ERROR: Floating IP address cannot be allocated.")
 #              status = instance.status
 #              while status !='Running':
 #                  time.sleep(5)
 #                  instance = nt.servers.get(instance.id)
 #                  status = instance.status
 #                  print "status: %s" % status
-    except:
-        print("ERROR: Cannot create server(s)")
 
 def TenantID(tenantName):
     tenants = keystone.tenants.list()
@@ -258,7 +266,13 @@ def AllocateIP(tenantID,externalGateway=externalGateway):
     ip = neutron.create_floatingip({'floatingip': floaters})
     IPaddr = ip.get('floatingip').get('floating_ip_address')
     IPaddrID = ip.get('floatingip').get('id')
-#    print(ip)
     print("INFO: ", IPaddr, "has been allocated.")
-#    print(IPaddrID)
     return IPaddr,IPaddrID
+
+def AssignFloatingIP(IPaddr, servername,user,password,tenant):
+    nt2 = Login(user,password,tenant)
+    time.sleep(1)
+    instance = nt2.servers.find(name=servername)
+    instance.add_floating_ip(address=IPaddr)
+    print("INFO: Floating IP assigned")
+#    print("IP assigned")
