@@ -3,6 +3,9 @@ Python3 code.
 """
 import datetime
 import time
+import os
+#import MySQLdb
+import mysql.connector
 from keystoneclient.v2_0 import client
 from keystoneclient.auth.identity import v2
 from keystoneclient import session
@@ -37,6 +40,21 @@ neutron = qclient.Client(username=username,
                          password=password,
                          tenant_name=tenant_name,
                          auth_url=auth_url)
+
+
+mySQLhost     = os.environ["mySQL_host"]
+mySQLusername = os.environ["mySQL_user"]
+mySQLpassword = os.environ["mySQL_password"]
+mySQLport     = os.environ["mySQL_port"]
+mySQLdatabase = os.environ["mySQL_database"]
+
+#db = MySQLdb.connect($host,$username,$password,$database)
+#cursor = db.curson()
+
+cnx = mysql.connector.connect(user=mySQLusername,database=mySQLdatabase,password=mySQLpassword,port=mySQLport)
+cursor = cnx.cursor()
+
+
 
 def GetTenantID(TenantName):
     tenants = keystone.tenants.list()
@@ -89,7 +107,7 @@ def createkeypair(user,password,tenant,authURL=auth_url):
     try:
        newkey = nt2.keypairs.create(username)
        privKey = newkey.private_key
-       f = open('/tmp/'+username+'.pem', 'w')
+       f = open('/var/www/Cloud-RAIN/tmp/'+username+'.pem', 'w')
        f.write(privKey)
        f.close
 # DEBUG: View new private key.
@@ -141,34 +159,48 @@ def Login(user,password,tenant,authURL=auth_url):
 #         print nt2.servers.list()
          return nt2
 
-
-def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tenant,authURL=auth_url):
-    no_of_inst = int(no_of_inst)
-    cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
-    nicsInfo = [{'net-id':networkID}]
-    for n in range(0, no_of_inst):
-        name_vars = [str(n), '-', cur_time]
-        server_name = ''.join(name_vars)
-        nt2 = Login(user,password,tenant,authURL)
-        try:
-                instance = nt2.servers.create(server_name, flavor=myfl, image=myim, key_name=mykey, nics=nicsInfo)
-                print("Info: Server ",n, " created.")
-        except:
-                print("ERROR: Cannot create server(s)")
-        try:
-                tenantID = GetTenantID(tenant)
-                print("CreateInstances: tenantID variable: ", tenantID)
-                IPaddr = str(AllocateIP(tenantID,gateway))
-                print("CreateInstances: IPaddr variable: ", IPaddr)
-                AssignFloatingIP(IPaddr,server_name ,user, password, user)
-        except:
-                print("ERROR: Floating IP address cannot be allocated.")
+def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tenant,authURL=auth_url,gateway=externalGateway):
+#    try:
+        no_of_inst = int(no_of_inst)
+        cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
+        nicsInfo = [{'net-id':networkID}]
+        for n in range(0, no_of_inst):
+              name_vars = [str(n), '-', cur_time]
+              server_name = ''.join(name_vars)
+              nt2 = Login(user,password,tenant,authURL)
+              try:
+                   instance = nt2.servers.create(server_name, flavor=myfl, image=myim, key_name=mykey, nics=nicsInfo)
+                   print("Info: Server ",server_name, " created.")
+              except:
+                   print("ERROR: Cannot create server(s)")
+              try:
+                   tenantID = GetTenantID(tenant)
+                   FloatingIPaddr = str(AllocateIP(tenantID,gateway))
+                   AssignFloatingIP(FloatingIPaddr,server_name ,user, password, user)
+                   instanceID = instance.id
+                   print("INFO: Instance ID: ",instanceID)
+#                   server = nt2.server.find(id=instance.id)
+#                   print("INFO: SERVER?:", server)
+#                   localIP = server.addresses.addr
+#                   print("INFO: Local IP: ",localIP)
+              except:
+                   print("ERROR: Floating IP address cannot be allocated.")
+              #try:
+#              InternalIP = GetInternalIP(FloatingIPaddr,user, password, user)
+#              print(InternalIP) 
+                   
+                   
+                   
+#              AssignFloatingIP("172.24.4.59","0-160526-143120",UserID, UserIDPass, UserID)
+#              return instance.get('id')
 #              status = instance.status
 #              while status !='Running':
 #                  time.sleep(5)
 #                  instance = nt.servers.get(instance.id)
 #                  status = instance.status
 #                  print "status: %s" % status
+#    except:
+#        print("ERROR: Cannot create server(s)")
 
 def TenantID(tenantName):
     tenants = keystone.tenants.list()
@@ -267,12 +299,36 @@ def AllocateIP(tenantID,externalGateway=externalGateway):
     IPaddr = ip.get('floatingip').get('floating_ip_address')
     IPaddrID = ip.get('floatingip').get('id')
     print("INFO: ", IPaddr, "has been allocated.")
-    return IPaddr,IPaddrID
+    print(IPaddrID)
+    return IPaddr
 
 def AssignFloatingIP(IPaddr, servername,user,password,tenant):
-    nt2 = Login(user,password,tenant)
-    time.sleep(1)
+    nt2 = Login(user,password,tenant) 
+    time.sleep(3)    
     instance = nt2.servers.find(name=servername)
     instance.add_floating_ip(address=IPaddr)
     print("INFO: Floating IP assigned")
-#    print("IP assigned")
+
+def GetInstanceID(FloatingIPaddr,user,password,tenant):
+    nt2 = Login(user,password,tenant)
+    instances = nt2.servers.list()
+    for instance in instances: 
+        #if instance.
+        print("INFO: Instance ID: ",instance.id)
+
+
+def database(option,nProject=None,InstanceName=None,InternalIP=None,ExternalIP=None):
+    
+    if option=="Update":
+        add_instance_info = ("INSERT INTO Details  "
+                             "(nProject, InstanceName, InternalIP, ExternalIP) "
+                             "VALUES (%s, %s, %s, %s)")
+        Instance_info = (nProject, InstanceName, InternalIP, ExternalIP)
+        cursor.execute(add_instance_info, Instance_info)
+        cnx.commit()
+        cursor.close()
+        cnx.close()                      
+    else:
+      print("WARNING: NOT A VALID DATABASE OPTION JAMES..."
+        
+)
