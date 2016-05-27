@@ -75,10 +75,11 @@ function enableWebsite(){
     echo "Listen *:81" >> /etc/apache2/ports.conf
 
     echo "ServerName site1" >> /etc/apache2/apache2.conf
-
 }
 
-
+function setVariables(){
+    source vars
+}
 
 function usage (){
     echo ""
@@ -90,6 +91,7 @@ function usage (){
     echo " copywebsite"
     echo " installSoftware"
     echo " enableWebsite"
+    echo " setVariables"
     echo ""
 }
 function main() {
@@ -107,6 +109,7 @@ function main() {
           copywebsite
           installSoftware
           enableWebsite
+          setVariables
     else
       case $1 in 
          "deployDB")
@@ -121,6 +124,9 @@ function main() {
          "enableWebsite")
             enableWebsite
             ;; 
+         "setVariables")
+            setVariables 
+            ;;
          *)
            usage
            exit 1

@@ -1,0 +1,8 @@
+########################################
+# Variable to connect to mySQL database
+########################################
+$mySQL_host="localhost"
+$mySQL_user="root"
+$mySQL_password="password"
+$mySQL_port="3306"
+$mySQL_database="Cloud"
