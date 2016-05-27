@@ -32,19 +32,14 @@ EOF
       PRIMARY KEY(ProjectID)
     );
     DESCRIBE BigTable;
-    
-    CREATE TABLE LookUp (
-      ID int(11) NOT NULL,
-      Image_Name tinytext CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-      Image_ID varchar(36) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
+
+    CREATE TABLE Details (
+      Project_Number smallint(5) UNSIGNED NOT NULL,
+      Instance_Name varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+      Internal_IP varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+      External_IP varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
     );
-    DESCRIBE LookUp;
-
-    INSERT INTO LookUp (ID, Image_Name, Image_ID) VALUES
-    (1, 'CirrOS', 'cc307f92-33db-43d6-936b-3375206ebe51'),
-    (2, 'Ubuntu', '9cb0cc56-8d3b-41ca-a2f8-99525e11c5af');
-
-    SELECT * FROM LookUp;
+    DESCRIBE Details;
 EOF
 }
 
