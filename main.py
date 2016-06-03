@@ -7,9 +7,6 @@ To execute: python main.py
 
 import pymysql
 import cloudrain
-#import time
-#import sys
-
 
 cnx = pymysql.connect(user='root',
                       password="password",
@@ -46,6 +43,7 @@ for ProjectID in cursor:
     UserIDPass = ProjectID[12]
     Phone = ProjectID[13]
 
+print("nProject:", nProject)
 Platform_ID = ""
 Platform_name = ""
 if Platform == 1:  ## CentOS-6
@@ -53,7 +51,7 @@ if Platform == 1:  ## CentOS-6
     Platform_name = "CentOS 6"
 #    print Platform_name
 elif Platform == 2:  ## UBUNTU 14.04.4 LTS
-    Platform_ID = "46524044-5a12-480f-9db3-2be905b14932"
+    Platform_ID = "385546f5-57fd-4c39-b7d4-493b8007db5d"
     Platform_name = "Ubuntu 14.04.4 LTS"
 #    print Platform_name
 
@@ -89,9 +87,6 @@ cloudrain.createkeypair(UserID, UserIDPass, UserID)
 ####################
 TenantID = cloudrain.TenantID(TenantName)
 net_name = ''.join([str(nProject), '-PrivateNetwork'])
-#print net_name
-#subnetID = ''
-#networkID = ''
 if cloudrain.CheckNetworking(net_name, TenantID) is False:
     networkID = cloudrain.CreateNetwork(net_name, TenantID)
     subnetID = cloudrain.CreateSubNetwork(net_name, networkID, TenantID)
@@ -101,19 +96,14 @@ if cloudrain.CheckNetworking(net_name, TenantID) is False:
 else:
     networkID = cloudrain.CheckNetworkID(net_name)
     subnetID = cloudrain.CheckSubNetworkID(net_name)
-#print "SUBNET ID is: ", subnetID
-#print "NETWORK ID is: ", networkID
-
-
 
 ####################
 # CREATE INSTANCES
 ####################
-#print "Entering Instance creation..."
 FL = cloudrain.flavor(FlavorSize)
 IM = cloudrain.image(Platform_name)
-cloudrain.CreateInstances(nInstance, FL, IM, UserID, networkID, UserID, UserIDPass, UserID)
-cloudrain.AllocateIP(TenantID)
+instanceID = cloudrain.CreateInstances(nInstance, FL, IM, UserID, networkID, UserID, UserIDPass, UserID, nProject=nProject)
+
 
 AnsibleScript = """
 # 

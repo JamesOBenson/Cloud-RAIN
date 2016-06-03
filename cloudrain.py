@@ -4,7 +4,7 @@ Python3 code.
 import datetime
 import time
 import os
-#import MySQLdb
+import pymysql
 import mysql.connector
 from keystoneclient.v2_0 import client
 from keystoneclient.auth.identity import v2
@@ -14,21 +14,32 @@ from openstackclient.network.v2 import network as osnet
 import novaclient as ns
 from neutronclient.v2_0 import client as qclient
 
-#  This is the network ID where the Floating IP's originate from "admin_floating_net" or "public" in devstack
+#################################################################
+#  This is the network ID where the Floating IP's 
+#  originate from "admin_floating_net" or "public" in DevStack
+#################################################################
 externalGateway = '93ac6df3-f4e9-4299-ac5f-26a147b17c9f'
 
+#####################
+# openRC infomation
+#####################
 username='admin'
 password='password'
 tenant_name='admin'
 auth_url='http://192.168.0.24:5000/v2.0'
 
-
+######################################
+# Keystone authentication information
+######################################
 keystone = client.Client(username=username, 
                          password=password,
                          tenant_name=tenant_name, 
                          auth_url=auth_url,
                          version=2)
 
+######################################
+# Nova authentication information
+######################################
 auth = v2.Password(username=username, 
                   auth_url=auth_url,
                   password=password,
@@ -36,24 +47,27 @@ auth = v2.Password(username=username,
 auth_session = session.Session(auth=auth)
 nt = nova_client.Client(2,session=auth_session)
 
+######################################
+# Neutron authentication information
+######################################
 neutron = qclient.Client(username=username,
                          password=password,
                          tenant_name=tenant_name,
                          auth_url=auth_url)
 
-
-mySQLhost     = os.environ["mySQL_host"]
-mySQLusername = os.environ["mySQL_user"]
-mySQLpassword = os.environ["mySQL_password"]
-mySQLport     = os.environ["mySQL_port"]
-mySQLdatabase = os.environ["mySQL_database"]
-
-#db = MySQLdb.connect($host,$username,$password,$database)
-#cursor = db.curson()
-
-cnx = mysql.connector.connect(user=mySQLusername,database=mySQLdatabase,password=mySQLpassword,port=mySQLport)
-cursor = cnx.cursor()
-
+######################################
+# mySQL authentication information
+######################################
+#mySQLhost     = os.environ["mySQL_host"]
+#mySQLusername = os.environ["mySQL_user"]
+#mySQLpassword = os.environ["mySQL_password"]
+#mySQLport     = os.environ["mySQL_port"]
+#mySQLdatabase = os.environ["mySQL_database"]
+mySQLusername = "root"
+mySQLpassword = "password"
+mySQLhost     = "localhost"
+mySQLport     = "3307"
+mySQLdatabase = "Cloud"
 
 
 def GetTenantID(TenantName):
@@ -82,12 +96,6 @@ def flavor(arg1):
     item = arg1
     server = nt.flavors.find(ram=item)
     return server    #Returns: <Flavor: m1.small>
-
-def flavor2(arg1):
-    item = arg1
-#    RAMS = nt.flavor.list( awk '{print$6} '
-    server = nt.flavors.find(ram=item)
-    return server
 
 def image(item):
     image = nt.images.find(name=item)
@@ -156,11 +164,9 @@ def Login(user,password,tenant,authURL=auth_url):
 
          auth_session = session.Session(auth=auth)
          nt2 = nova_client.Client(2,session=auth_session)
-#         print nt2.servers.list()
          return nt2
 
-def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tenant,authURL=auth_url,gateway=externalGateway):
-#    try:
+def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tenant,authURL=auth_url,gateway=externalGateway,nProject="0"):
         no_of_inst = int(no_of_inst)
         cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
         nicsInfo = [{'net-id':networkID}]
@@ -179,28 +185,9 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tena
                    AssignFloatingIP(FloatingIPaddr,server_name ,user, password, user)
                    instanceID = instance.id
                    print("INFO: Instance ID: ",instanceID)
-#                   server = nt2.server.find(id=instance.id)
-#                   print("INFO: SERVER?:", server)
-#                   localIP = server.addresses.addr
-#                   print("INFO: Local IP: ",localIP)
+                   database(option="Update",nProject=nProject,InstanceName=server_name,InternalIP=instanceID,ExternalIP=FloatingIPaddr)
               except:
                    print("ERROR: Floating IP address cannot be allocated.")
-              #try:
-#              InternalIP = GetInternalIP(FloatingIPaddr,user, password, user)
-#              print(InternalIP) 
-                   
-                   
-                   
-#              AssignFloatingIP("172.24.4.59","0-160526-143120",UserID, UserIDPass, UserID)
-#              return instance.get('id')
-#              status = instance.status
-#              while status !='Running':
-#                  time.sleep(5)
-#                  instance = nt.servers.get(instance.id)
-#                  status = instance.status
-#                  print "status: %s" % status
-#    except:
-#        print("ERROR: Cannot create server(s)")
 
 def TenantID(tenantName):
     tenants = keystone.tenants.list()
@@ -318,17 +305,23 @@ def GetInstanceID(FloatingIPaddr,user,password,tenant):
 
 
 def database(option,nProject=None,InstanceName=None,InternalIP=None,ExternalIP=None):
+    cnx = pymysql.connect(user=mySQLusername,
+                      password=mySQLpassword,
+                      host=mySQLhost,
+                      unix_socket="/var/run/mysqld/mysqld.sock",
+                      port=mySQLport,
+                      db=mySQLdatabase)
+    cursor = cnx.cursor()
     
     if option=="Update":
         add_instance_info = ("INSERT INTO Details  "
-                             "(nProject, InstanceName, InternalIP, ExternalIP) "
+                             "(Project_Number, Instance_Name, Internal_IP, External_IP) "
                              "VALUES (%s, %s, %s, %s)")
         Instance_info = (nProject, InstanceName, InternalIP, ExternalIP)
         cursor.execute(add_instance_info, Instance_info)
         cnx.commit()
         cursor.close()
-        cnx.close()                      
+        cnx.close()
+        print("INFO: Instance information inserted into the 'Details' table...")
     else:
-      print("WARNING: NOT A VALID DATABASE OPTION JAMES..."
-        
-)
+        print("WARNING: Instance information not inserted into the 'Details' table...") 
