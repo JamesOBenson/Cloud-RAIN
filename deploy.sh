@@ -36,7 +36,7 @@ EOF
     CREATE TABLE Details (
       Project_Number smallint(5) UNSIGNED NOT NULL,
       Instance_Name varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
-      Internal_IP varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+      Instance_ID varchar(40) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
       External_IP varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
     );
     DESCRIBE Details;
@@ -51,6 +51,8 @@ function copywebsite(){
     sudo cp *.py /var/www/Cloud-RAIN
     sudo cp *.html /var/www/Cloud-RAIN
     sudo cp *.php /var/www/Cloud-RAIN
+    sudo mkdir /var/www/Cloud-RAIN/tmp
+    sudo chmod +666 /var/www/Cloud-RAIN/tmp
 }
 
 function installSoftware(){
