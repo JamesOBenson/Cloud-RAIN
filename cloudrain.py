@@ -304,7 +304,7 @@ def GetInstanceID(FloatingIPaddr,user,password,tenant):
         print("INFO: Instance ID: ",instance.id)
 
 
-def database(option,nProject=None,InstanceName=None,InternalIP=None,ExternalIP=None):
+def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=None):
     cnx = pymysql.connect(user=mySQLusername,
                       password=mySQLpassword,
                       host=mySQLhost,
@@ -315,9 +315,9 @@ def database(option,nProject=None,InstanceName=None,InternalIP=None,ExternalIP=N
     
     if option=="Update":
         add_instance_info = ("INSERT INTO Details  "
-                             "(Project_Number, Instance_Name, Internal_IP, External_IP) "
+                             "(Project_Number, Instance_Name, Instance_ID, External_IP) "
                              "VALUES (%s, %s, %s, %s)")
-        Instance_info = (nProject, InstanceName, InternalIP, ExternalIP)
+        Instance_info = (nProject, InstanceName, InstanceID, ExternalIP)
         cursor.execute(add_instance_info, Instance_info)
         cnx.commit()
         cursor.close()
