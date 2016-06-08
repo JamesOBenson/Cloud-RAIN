@@ -1,81 +1,160 @@
+<!DOCTYPE HTML>
 <html>
 <head>
-  <Project Name>Cloud Research Automation for Infrastructure and Software - New Project Entry</Project Name>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Cloud RAIN</title>
+<link type="text/css" rel="stylesheet" href="main.css">
+
+<style type="text/css">
+
+	body {
+		margin: 0;
+	}
+
+	.demo-bar {
+		background: #252525;
+		width: 100%;
+		height: 118px;
+		margin-bottom: 40px;
+		float: left;
+	}
+
+	.demo-bar:after {
+		content: "";
+		display: block;
+		clear: both;
+	}
+
+	.demo-bar img:first-of-type {
+		float: left;
+		max-width: 100%;
+		position: absolute;
+		left: 0;
+		bottom: 0;
+	}
+
+	.demo-bar .left {
+		float: left;
+		width: 60%;
+		height: 118px;
+		position: relative;
+	}
+
+	.demo-bar .right {
+		background: url(images/demo-bar-right.jpg) left no-repeat #2e2e2e;
+		width: 40%;
+		max-width: 350px;
+		height: 118px;
+		float: right;
+		position: relative;
+	}
+
+		.demo-bar p {
+			width: auto;
+			color: #666;
+			position: absolute;
+			bottom: 30px;
+			right: 5%;
+			text-align: right;
+		}
+
+		.demo-bar a {
+			color: #ccc;
+			font-size: 10px;
+			border-bottom: 1px dotted #999;
+			text-transform: uppercase;
+			text-decoration: none;
+		}
+
+		.twitter-buttons {
+			position: absolute;
+			top: 20px;
+			right: 5%;
+			text-align: right;
+		}
+
+	.clearfix {
+		clear: both;
+	}
+
+	@media screen and (max-width:580px) {
+		.demo-bar .left {
+		}
+
+		.demo-bar .right {
+			background: none;
+		}
+
+		.demo-bar p {
+			width: 100px;
+			color: #252525;
+		}
+	}
+
+</style>
 </head>
 
 <body>
-  <h1>Rains - New Project Entry</h1>
+    <header class="body">
+        <h1>Cloud RAINS</h1>
+    </header>
 
-  <form action="insert_record.php" method="POST">
-    <table border="0">
-      <tr>
-        <td>First Name</td>
-        <td><input type="text" name="FirstName" maxlength="30" size="30" required></td>
-      </tr>
-      <tr>
-        <td>Last Name</td>
-        <td> <input type="text" name="LastName" maxlength="30" size="30" required></td>
-      </tr>
-      <tr>
-        <td>E-mail</td>
-        <td> <input type="text" name="Email" maxlength="80" size="30" required></td>
-      </tr>
-      <tr>
-        <td>Phone</td>
-        <td><input type="text" name="Phone" maxlength="15" size="15" required></td>
-      </tr>
+    <section class="body">
+    <p>This is a new project entry form for the Cloud Research Automation for Infrastructure and Software (RAINS) deployment.</p>
+    <form action="insert_record.php" method="POST">
+       <table border="0">
+          <label>First Name</label>
+          <input type="text" name="FirstName" maxlength="30" size="30" required>
 
+          <label>Last Name</label>
+          <input type="text" name="LastName" maxlength="30" size="30" required>
 
-      <tr>
-        <td>Project Name</td>
-        <td><input type="text" name="ProjectName" maxlength="80" size="30"></td>
-      </tr>
-      <tr>
-        <td>Number of Instances</td>
-        <td><input type="text" name="nInstance" maxlength="2" size="7" required></td>
-      </tr>
-      <tr>
-        <td>Flavor Size</td>
-        <td>
-            <input type="radio" name="FlavorSize" value="512">Tiny
-            <input type="radio" name="FlavorSize" value="2048">Small
-            <input type="radio" name="FlavorSize" value="4096" CHECKED>Medium
-            <input type="radio" name="FlavorSize" value="8192">Large
-            <input type="radio" name="FlavorSize" value="16384">XLarge
-        </td>
-      </tr>
-      <tr>
-        <td>Platform</td>
-        <td>
-            <input type="radio" name="Platform" value="3">CentOS
-            <input type="radio" name="Platform" value="2" CHECKED>Ubuntu 14.04
-            <input type="radio" name="Platform" value="1">CirrOS
-        </td>
-      </tr>
-      <tr>
-        <td>Deployment</td>
-        <td>
-            <input type="radio" name="Deployment" value="1" CHECKED>Hadoop
-        </td>
-      </tr>
-      <tr>
-        <td>UserID (abc123)</td>
-        <td><input type="text" name="UserID" maxlength="6" size="30" required></td>
-      </tr>
-      <tr>
-        <td>UserIDPass</td>
-        <td><input type="password" name="UserIDPass" maxlength="20" size="30" required></td>
-      </tr>
-      <tr>
-        <td>Comment</td>
-        <td><textarea name="Comment" rows="5" cols="30"></textarea></td>
-      </tr>
+          <label>E-mail</label>
+          <input type="text" name="Email" maxlength="80" size="30" required>
 
+          <label>Phone</label>
+          <input type="text" name="Phone" maxlength="15" size="15" required>
 
-      <tr>
-        <td colspan="2"><input type="submit" value="Create"></td>
-      </tr>
-    </table>
-  </form>
+          <label>Project Name</label>
+          <input type="text" name="ProjectName" maxlength="80" size="30">
+
+          <label>Number of Instances</label>
+          <input type="text" name="nInstance" maxlength="2" size="7" required>
+
+          <label>Flavor Size</label>
+            <select name="FlavorSize">
+               <option value="2048">Small</option>
+               <option value="4096" selected>Medium</option>
+               <option value="8192">Large</option>
+               <option value="16384">XLarge</option>
+            </select>
+            
+          <label>Platform</label>
+            <select name="Platform">
+               <option value="3">CentOS</option>
+               <option value="2" selected>Ubuntu 14.04</option>
+               <option value="1">CirrOS</option>
+            </select>
+
+          <label>Deployment</label>
+            <select name="Platform">
+               <option value="1" selected>Nothing</option>
+               <option value="2" >Hadoop</option>
+               <option value="3">openMPI</option>
+            </select>
+
+        <label>UserID (abc123)</label>
+        <input type="text" name="UserID" maxlength="6" size="30" required>
+
+        <label>User ID Password</label>
+        <input type="password" name="UserIDPass" maxlength="20" size="30" required>
+
+        <label>Comment</label>
+        <textarea name="Comment" rows="5" cols="30"></textarea>
+
+        <input id="submit" name="submit" type="submit" value="Create">
+       </table>
+    </form>
+    </section>
 </body>
 </html>
