@@ -22,7 +22,7 @@ EOF
       nInstance int(11) NOT NULL,
       nIPs tinytext,
       Deployment varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL,
-      Platform int(11) NOT NULL,
+      Platform varchar(25) NOT NULL,
       ProjectName varchar(80) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
       UserID varchar(16) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
       UserIDPass varchar(20) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
@@ -40,6 +40,15 @@ EOF
       External_IP varchar(15) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL
     );
     DESCRIBE Details;
+
+    CREATE TABLE Users (
+      UserID varchar(6) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+      SSHKey varchar(2000) CHARACTER SET utf8 COLLATE utf8_unicode_ci NOT NULL,
+      UNIQUE KEY (UserID),
+      PRIMARY KEY(UserID)
+    );
+    DESCRIBE Users;
+
 EOF
 }
 

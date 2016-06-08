@@ -101,6 +101,14 @@ def image(item):
     image = nt.images.find(name=item)
     return image  #Returns: <Image: Ubuntu 14.04.4 LTS>
 
+def imageID(item):
+    image = nt.images.find(name=item).id
+    return image  #Returns: 385546f5-57fd-4c39-b7d4-493b8007db5d
+
+def imageName(item):
+    image = nt.images.find(name=item).name
+    return image  #Returns: Ubuntu 14.04.4 LTS
+
 def findkeypair(item):
     try:
       keypair = nt.keypairs.find(name=item)
@@ -184,17 +192,17 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tena
                    FloatingIPaddr = str(AllocateIP(tenantID,gateway))
                    AssignFloatingIP(FloatingIPaddr,server_name ,user, password, user)
                    instanceID = instance.id
-                   print("INFO: Instance ID: ",instanceID)
-                   database(option="Update",nProject=nProject,InstanceName=server_name,InternalIP=instanceID,ExternalIP=FloatingIPaddr)
+#                   print("INFO: Instance ID: ",instanceID)
               except:
                    print("ERROR: Floating IP address cannot be allocated.")
+              database(option="Update",nProject=nProject,InstanceName=server_name,InstanceID=instanceID,ExternalIP=FloatingIPaddr)
 
 def TenantID(tenantName):
     tenants = keystone.tenants.list()
     try: 
         my_tenant = [x for x in tenants if x.name==tenantName][0]
         tenantID = my_tenant.id
-        print("TenantID captured ...")
+        print("Info: TenantID captured ...")
         return tenantID
     except:
         print("ERROR: Could not find tenant id.")
@@ -202,10 +210,10 @@ def TenantID(tenantName):
 def CheckNetworking(networkname, TenantID):
     try:
          my_networks = neutron.list_networks(name=networkname)['networks'][0]['id']
-         print("Network exists")
+         print("Info: Network exists")
          return  True
     except IndexError:
-         print("Network does not exist... continuing.")
+         print("Info: Network does not exist... continuing.")
          return False
 
 def CreateNetwork(networkname, TenantID):
@@ -305,6 +313,11 @@ def GetInstanceID(FloatingIPaddr,user,password,tenant):
 
 
 def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=None):
+    mySQLusername = "root"
+    mySQLpassword = "password"
+    mySQLhost     = "localhost"
+    mySQLport     = "3307"
+    mySQLdatabase = "Cloud"
     cnx = pymysql.connect(user=mySQLusername,
                       password=mySQLpassword,
                       host=mySQLhost,

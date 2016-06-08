@@ -44,15 +44,19 @@ for ProjectID in cursor:
     Phone = ProjectID[13]
 
 print("nProject:", nProject)
-Platform_ID = ""
-Platform_name = ""
-if Platform == 1:  ## CentOS-6
-    Platform_ID = "e2af8797-739b-4777-8382-f43c24d8c261"
-    Platform_name = "CentOS 6"
+#Platform_ID = ""
+#Platform_name = ""
+
+Platform_name = cloudrain.imageName(Platform)
+Platform_ID = cloudrain.imageID(Platform)
+
+#if Platform == 1:  ## CentOS-6
+#    Platform_ID = "e2af8797-739b-4777-8382-f43c24d8c261"
+#    Platform_name = "CentOS 6"
 #    print Platform_name
-elif Platform == 2:  ## UBUNTU 14.04.4 LTS
-    Platform_ID = "385546f5-57fd-4c39-b7d4-493b8007db5d"
-    Platform_name = "Ubuntu 14.04.4 LTS"
+#elif Platform == 2:  ## UBUNTU 14.04.4 LTS
+#    Platform_ID = "385546f5-57fd-4c39-b7d4-493b8007db5d"
+#    Platform_name = "Ubuntu 14.04.4 LTS"
 #    print Platform_name
 
 #################
@@ -101,8 +105,8 @@ else:
 # CREATE INSTANCES
 ####################
 FL = cloudrain.flavor(FlavorSize)
-IM = cloudrain.image(Platform_name)
-instanceID = cloudrain.CreateInstances(nInstance, FL, IM, UserID, networkID, UserID, UserIDPass, UserID, nProject=nProject)
+#IM = cloudrain.image(Platform_name)
+instanceID = cloudrain.CreateInstances(nInstance, FL, Platform_ID, UserID, networkID, UserID, UserIDPass, UserID, nProject=nProject)
 
 
 AnsibleScript = """
@@ -156,5 +160,4 @@ cnx.close()
 
 #project.project()
 #os.system("ansible-playbook "+FileName+" --ask-pass")
-
 

@@ -41,7 +41,7 @@ $allowed_ext = array (
   'doc' => 'application/msword',
   'xls' => 'application/vnd.ms-excel',
   'ppt' => 'application/vnd.ms-powerpoint',
-  'pem' => 'application/octet-stream',  
+  'pem' => 'application/x-pem-file',
   // executables
   'exe' => 'application/octet-stream',
 
