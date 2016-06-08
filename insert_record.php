@@ -185,7 +185,7 @@ echo "<br>Connection closed.<br>";
 ////////////////////////////
 // DOWNLOAD PEM FILE
 ////////////////////////////
-$link_address = 'http://10.3.100.3/Cloud-RAINS/download.php?f=' . $UserID . '.pem';
+$link_address = 'http://10.3.100.43:81/Cloud-RAIN/download.php?f=' . $UserID . '.pem';
 echo "<a href='$link_address'>PRIVATE PEM FILE DOWNLOAD NOW</a>";
 
 echo "END OF FILE!";

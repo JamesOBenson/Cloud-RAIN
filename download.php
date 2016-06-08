@@ -19,7 +19,7 @@ define('ALLOWED_REFERRER', '');
 
 // Download folder, i.e. folder where you keep all files for download.
 // MUST end with slash (i.e. "/" )
-define('BASE_DIR','/tmp/');
+define('BASE_DIR','/var/www/Cloud-RAIN/tmp/');
 
 // log downloads?  true/false
 define('LOG_DOWNLOADS',true);
