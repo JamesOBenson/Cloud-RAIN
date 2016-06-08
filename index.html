@@ -119,7 +119,11 @@
           <input type="text" name="ProjectName" maxlength="80" size="30">
 
           <label>Number of Instances</label>
-          <input type="text" name="nInstance" maxlength="2" size="7" required>
+            <select name="nInstance">
+               <option value="1" selected>1</option>
+               <option value="2">2</option>
+               <option value="3">3</option>
+            </select>          
 
           <label>Flavor Size</label>
             <select name="FlavorSize">
@@ -131,9 +135,9 @@
             
           <label>Platform</label>
             <select name="Platform">
-               <option value="3">CentOS</option>
+               <option value="1">CentOS</option>
                <option value="2" selected>Ubuntu 14.04</option>
-               <option value="1">CirrOS</option>
+               <option value="3">CirrOS</option>
             </select>
 
           <label>Deployment</label>
