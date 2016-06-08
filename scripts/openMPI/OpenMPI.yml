@@ -1,0 +1,273 @@
+---
+# Parent: 0
+# Child: 0
+#
+# Copyright 2016 James Benson
+#
+#   Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+#
+- hosts: testgroup
+  user: ubuntu
+  become: yes
+  vars:
+    TEMP_LOCATION: /tmp/openmpi
+    FINAL_LOCATION: /opt/openmpi-1.10.2
+    DEBUG_LOCATION: /tmp/openMPI-examples
+  name: OpenMPI Deployment beginning ...
+  tasks:
+     
+  - name: Update ubuntu ...
+    apt: update_cache=yes
+    tags:
+      - easy
+      - latest
+
+  - name: Install required packages ...
+    apt: name={{ item }} state=present
+    with_items:
+     - build-essential
+     - python-dev
+     - python-pip
+     - python-mpi4py
+     - python3-mpi4py
+    tags:
+      - easy
+      - latest
+
+  - name: Install python packages for MPI
+    pip: name= {{ item }} state=present
+    with_items:
+      - numpy
+      - scipy
+      - matplotlib
+      - pandas
+      - nose
+      - pylint
+    tags:
+      - easy
+      - latest
+
+  - name: Disable Strict Host Key Checking in SSH Config
+    lineinfile: >
+      dest=/etc/ssh/ssh_config
+      line="StrictHostKeyChecking no" 
+      insertafter='EOF' 
+      state=present
+    tags:
+      - easy
+      - latest
+
+  - name: Install openmpi v1.6.5 ...
+    apt: name={{ item }} state=present
+    with_items:
+      - openmpi-bin
+      - openmpi-doc
+      - libopenmpi-dev
+      - openmpi-checkpoint
+      - openmpi-common
+    tags:
+      - easy
+
+  - name: Remove openmpi v1.6.5 ...
+    apt: name={{ item }} state=absent purge=yes
+    with_items:
+      - openmpi-bin
+      - openmpi-doc
+      - libopenmpi-dev
+      - openmpi-checkpoint
+      - openmpi-common
+    tags:
+      - latest
+
+
+  - name: Install necessary packages for openstack v1.10.2 ...
+    apt: name={{ item }} state=present
+    with_items:
+      - libibnetdisc-dev
+    tags:
+      - latest
+
+  - name: Create temp directory ...
+    file: path={{ TEMP_LOCATION }} state=directory mode=0755
+    tags:
+      - latest
+
+  - name: Create final directory ...
+    file: path={{ FINAL_LOCATION }} state=directory
+    tags:
+      - always
+
+  - name: Untar OpenMPI ...
+    unarchive:
+      src: http://www.open-mpi.org/software/ompi/v1.10/downloads/openmpi-1.10.2.tar.gz
+      dest: "{{ TEMP_LOCATION }}"
+      copy: no
+    tags:
+      - latest
+
+  - name: Running the ./configure for OpenMPI (Please be patient) ...
+    command: "{{ item }}"
+    args:
+      chdir: "{{ TEMP_LOCATION }}/openmpi-1.10.2"
+    with_items:
+      - ./configure --prefix='{{ FINAL_LOCATION }}'
+    tags:
+      - latest
+  
+  - name: Running the "make" for OpenMPI (Please be patient) ...
+    command: "{{ item }}"
+    args:
+      chdir: "{{ TEMP_LOCATION }}/openmpi-1.10.2"
+    with_items:
+      - make
+    tags:
+      - latest
+
+  - name: Running the "make install" for OpenMPI (Please be patient) ...
+    command: make install
+    args:
+      chdir: "{{ TEMP_LOCATION }}/openmpi-1.10.2"
+    tags:
+      - latest
+
+  - name: Create Symbolic links
+    file: 
+      src="{{ FINAL_LOCATION }}/bin/{{ item }}"
+      dest=/usr/local/bin/{{ item }}
+      state=link
+    with_items:
+      - mpic++
+      - mpicc
+      - mpiCC
+      - mpicc-vt
+      - mpiCC-vt
+      - mpic++-vt
+      - mpicxx
+      - mpicxx-vt
+      - mpiexec
+      - mpif77
+      - mpif77-vt
+      - mpif90
+      - mpif90-vt
+      - mpifort
+      - mpifort-vt
+      - mpirun
+    tags:
+      - latest
+
+  - name: Install python packages ...
+    apt: name={{ item }} state=present
+    with_items:
+     - python-mpi4py
+     - python3-mpi4py
+    tags:
+      - latest
+
+  - name: Create verification directory ...
+    file: path="{{ DEBUG_LOCATION }}" state=directory mode=0755
+    tags:
+      - always
+      - verify
+
+  - name: Download hello_c.c from open-mpi.org
+    get_url:
+      url=http://svn.open-mpi.org/svn/ompi/tags/v1.6-series/v1.6.4/examples/hello_c.c       dest="{{ DEBUG_LOCATION }}/hello_c.c"
+    tags:
+      - verify
+      - always
+
+  - name: Compiling Hello world test ...
+    shell: mpicc {{ DEBUG_LOCATION }}/hello_c.c -o {{ DEBUG_LOCATION }}/hello
+    tags:
+      - verify
+      - always
+
+  - name: Running Hello world test ...
+    shell: mpirun {{ DEBUG_LOCATION }}/hello
+    register: world
+    become: no
+    tags:
+      - verify
+      - always
+
+  - debug: msg="Hello world success!"
+    when: "'Hello, world, I am 0 of 1' in world.stdout_lines"
+    tags:
+      - verify
+      - always
+
+  - debug: msg="WARNING - Hello world success!"
+    when: "'Hello, world, I am 0 of 1' not in world.stdout_lines"
+    tags:
+      - verify
+      - always
+
+  - name: Download connectivity_c.c from open.mpi.org
+    get_url:
+      url=http://svn.open-mpi.org/svn/ompi/tags/v1.6-series/v1.6.4/examples/connectivity_c.c     dest={{ DEBUG_LOCATION }}/connectivity_c.c
+    tags:
+      - verify
+      - always
+
+  - name: Connectivity compile
+    shell: mpicc {{ DEBUG_LOCATION }}/connectivity_c.c -o {{ DEBUG_LOCATION }}/connectivity
+    tags:
+      - verify
+      - always
+
+  - name: Connectivity test
+    shell: mpirun {{ DEBUG_LOCATION }}/connectivity
+    register: connectivity
+    become: no
+    tags:
+      - verify
+      - always
+
+  - debug: msg="Connectivity success!"
+    when: "'Connectivity test on 1 processes PASSED.' in connectivity.stdout_lines"
+    tags:
+      - verify
+      - always
+
+  - debug: msg="WARNING - Connectivity failure!"
+    when: "'Connectivity test on 1 processes PASSED.' not in connectivity.stdout_lines"
+    tags:
+      - verify
+      - always
+
+  - name: Transfer HelloWorld.py file
+    get_url:
+      url=https://raw.githubusercontent.com/JamesOBenson/openMPI/master/HelloWorld.py
+      dest={{ DEBUG_LOCATION }}/HelloWorld.py
+    tags:
+      - verify
+      - always
+
+  - name: Transfer mpi_pi.py file
+    get_url:
+      url=https://raw.githubusercontent.com/JamesOBenson/openMPI/master/mpi_pi.py
+      dest={{ DEBUG_LOCATION }}/mpi_pi.py
+    tags:
+      - verify
+      - always
+
+  - name: Transfer mpi_hosts file
+    copy: 
+      src: "mpi_hosts"
+      dest: "{{ DEBUG_LOCATION }}/mpi_hosts"
+      owner: ubuntu
+      group: admin
+      mode: 0666
+    tags:
+      - verify
+      - always

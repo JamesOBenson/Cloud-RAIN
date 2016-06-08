@@ -1,0 +1,36 @@
+
+# 
+# This document was created automatically for James Benson
+# on 2016-06-02 19:36:09.
+# 
+---
+- hosts: openstack-local
+  remote_user: root
+  become: yes
+  gather_facts: no
+
+  tasks:
+#  - shell: export OS_USERNAME=admin
+#  - shell: export OS_PASSWORD=password
+  - shell: openstack project create --description 'Project 1' JamesBensonProject #--os-username=admin --os-auth-url=http://192.168.56.20:5000/v2.0
+
+  - os_server:
+      state: present
+      auth:
+          auth_url: http://192.168.56.20:5000/v2.0
+          username: admin
+          password: password
+          project_name: Test1
+      name: vm1
+      image: 2
+      key_name: james
+      timeout: 200
+      flavor: 2048
+      nics:
+        - net-id: 34605f38-e52a-25d2-b6ec-754a13ffb723
+        - net-name: another_network
+      meta:
+        hostname: test1
+        group: test_group
+
+
