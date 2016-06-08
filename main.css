@@ -66,9 +66,8 @@ input, textarea {
 	}
 
 textarea {
-	height:213px;
+	height:100px;
 	font-family:Arial, Helvetica, sans-serif;
-	background:url(images/textarea-bg.jpg) right no-repeat #efefef;
 }
 
 #submit {
