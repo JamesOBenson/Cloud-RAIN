@@ -312,7 +312,7 @@ def GetInstanceID(FloatingIPaddr,user,password,tenant):
         print("INFO: Instance ID: ",instance.id)
 
 
-def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=None):
+def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=None,UserID=None,SSHKey=None):
     mySQLusername = "root"
     mySQLpassword = "password"
     mySQLhost     = "localhost"
@@ -338,3 +338,14 @@ def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=N
         print("INFO: Instance information inserted into the 'Details' table...")
     else:
         print("WARNING: Instance information not inserted into the 'Details' table...") 
+
+    if option=="UpdateUsers":
+        add_user_info = ("INSERT INTO Users  "
+                         "(UserID, SSHKey) "
+                         "VALUES (%s, %s)")
+        User_info = (UserID, SSHKey)
+        cursor.execute(add_user_info, User_info)
+        cnx.commit()
+        cursor.close()
+        cnx.close()
+        print("INFO: User info was updated into the 'Users' table....")
