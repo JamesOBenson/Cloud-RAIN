@@ -13,6 +13,7 @@ from novaclient import client as nova_client
 from openstackclient.network.v2 import network as osnet
 import novaclient as ns
 from neutronclient.v2_0 import client as qclient
+from subprocess import call
 
 #################################################################
 #  This is the network ID where the Floating IP's 
@@ -126,6 +127,7 @@ def createkeypair(user,password,tenant,authURL=auth_url):
        f = open('/var/www/Cloud-RAIN/tmp/'+username+'.pem', 'w')
        f.write(privKey)
        f.close
+       database(option="UpdateUsers",UserID=username,SSHKey=privKey)
 # DEBUG: View new private key.
 #      print(nt.keypairs.get(newkey))
        print "KeyPair generated for", username
@@ -196,6 +198,16 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user,password,tena
               except:
                    print("ERROR: Floating IP address cannot be allocated.")
               database(option="Update",nProject=nProject,InstanceName=server_name,InstanceID=instanceID,ExternalIP=FloatingIPaddr)
+              write_host_file(nProject,FloatingIPaddr)
+              
+#              ansible(nProject,deployment)
+
+def write_host_file(nproject,ip):
+    ip = str(ip)+"\n"
+    f = open(str(nproject),'a')
+    f.write(ip)
+    a = "INFO: %s has been added to the file: %s" % (ip, nproject)
+    print(a)
 
 def TenantID(tenantName):
     tenants = keystone.tenants.list()
@@ -310,6 +322,16 @@ def GetInstanceID(FloatingIPaddr,user,password,tenant):
     for instance in instances: 
         #if instance.
         print("INFO: Instance ID: ",instance.id)
+
+def ansible(hostsfile,deployment):
+    print("Ansible")
+    if deployment == "openmpi":
+       deploy = "scripts/openMPI/OpenMPI.yml"
+    cmds = "ansible-playbook -i %s %s" % (hostsfile, deploy)
+    print(cmds)
+    call([cmds])
+
+
 
 
 def database(option,nProject=None,InstanceName=None,InstanceID=None,ExternalIP=None,UserID=None,SSHKey=None):
