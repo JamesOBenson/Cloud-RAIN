@@ -5,7 +5,7 @@ Python3 code.
 import time
 import sys
 import select
-
+import paramiko
 #import os
 from subprocess import call
 import pymysql
@@ -18,6 +18,8 @@ from novaclient import client as nova_client
 #import novaclient as ns
 from neutronclient.v2_0 import client as qclient
 from scp import SCPClient
+import shutil
+import os
 
 #################################################################
 #  This is the network ID where the Floating IP's
@@ -131,6 +133,8 @@ def createkeypair(user, password, tenant, authURL=auth_url):
         f = open('/var/www/Cloud-RAIN/tmp/'+username+'.pem', 'w')
         f.write(privKey)
         f.close
+        shutil.copy2('/var/www/Cloud-RAIN/tmp/'+username+'.pem', '/root/.ssh/'+username+'.pem')
+#        os.chmod('/root/.ssh/'+username+'.pem', 0600)
         database(option="UpdateUsers", UserID=username, SSHKey=privKey)
 # DEBUG: View new private key.
 #      print(nt.keypairs.get(newkey))
@@ -200,19 +204,34 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user, password,
             FloatingIPaddr = str(AllocateIP(tenantID, gateway))
             AssignFloatingIP(FloatingIPaddr, server_name, user, password, user)
             instanceID = instance.id
-#           print("INFO: Instance ID: ",instanceID)
-        except:
-            print "ERROR: Floating IP address cannot be allocated."
             database(option="Update", nProject=nProject, InstanceName=server_name,
                      InstanceID=instanceID, ExternalIP=FloatingIPaddr)
             write_host_file(nProject, FloatingIPaddr)
 
-#           ansible(nProject,deployment)
+#           print("INFO: Instance ID: ",instanceID)
+        except:
+            print "ERROR: Floating IP address cannot be allocated."
+    #    database(option="Update", nProject=nProject, InstanceName=server_name,
+    #                 InstanceID=instanceID, ExternalIP=FloatingIPaddr)
+#        write_host_file(nProject, FloatingIPaddr)
+
+    try:
+        UpdateSecurityGroups(user, password, tenant, proto='tcp', fport=22, tport=22)
+    except:
+        print "Security group has SSH access."
+
+    with open(str(nProject)) as f:
+        nhosts = f.read().splitlines()
+    hosts = [str(host) for host in nhosts]
+    SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files=None,commands=None)
+    SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files=str(nProject),commands=None)
+    
 
 def write_host_file(nproject, ip):
     ip = str(ip)+"\n"
     f = open(str(nproject), 'a')
     f.write(ip)
+    f.close()
     a = "INFO: %s has been added to the file: %s" % (ip, nproject)
     print a
 
@@ -323,6 +342,14 @@ def AssignFloatingIP(IPaddr, servername, user, password, tenant):
     instance.add_floating_ip(address=IPaddr)
     print "INFO: Floating IP assigned"
 
+def UpdateSecurityGroups(user, password, tenant, proto=None, fport=None, tport=None):
+    nt2 = Login(user, password, tenant)
+    time.sleep(3)
+    group = nt2.security_groups.find(name="default")
+    nt2.security_group_rules.create(group.id, ip_protocol=proto,
+                                 from_port=fport, to_port=tport)
+    print "INFO: Security Groups updated"
+
 def GetInstanceID(FloatingIPaddr, user, password, tenant):
     nt2 = Login(user, password, tenant)
     instances = nt2.servers.list()
@@ -335,65 +362,77 @@ host =  either a FQDN that is pingable or preferrably an IP
 user =  username that should be used to log into the systems
 pkeylocation = full working dir to the private key including pem file
 key = the contents of the private key (currently a space holder and not used)
-files = files that should be transfered
+files = files that should be transfered (both full path or local dir work)
+        Also, multiple files can be transferred using a comma  seperated list...
 commands = command that should be executed.
+
+Currently, this will attempt to ssh into the instance 60 times with 10 seconds
+before each try, totalling 600 seconds or 10 minutes
 """
-def SSH(host,user,pkeylocation,key,files,commands):
-    i = 1
+def SSH(hosts, user, pkeylocation=None, key=None, files=None, commands=None):
+#    i = 1
     ntimestotry = 60
     sleeptime = 10
-    while True:
-    print "Trying to connect to %s (%i/30)" % (host, i)
-    try:
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect(host, username=user,key_filename=pkeylocation)
-        print "Connected to %s" % host
-        break
-    except paramiko.AuthenticationException:
-        print "Authentication failed when connecting to %s" % host
-        sys.exit(1)
-    except:
-        print "Could not SSH to %s, waiting for it to start" % host
-        i += 1
-        time.sleep(sleeptime)
-    # If we could not connect within time limit
-    if i == ntimestotry:
-        print "Could not connect to %s. Giving up" % host
-        sys.exit(1)
-#
-# SCP files over using paramiko protocol
-#
-	scp = SCPClient(ssh.get_transport())
-	scp.put(files)
-	#scp.get('test2.txt')
-	scp.close
+    ssh = paramiko.SSHClient()
+    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    for host in hosts:
+#            i = 1
+            host = str(host)
+            for i in xrange(ntimestotry):
+		    print "Trying to connect to %s (%i/%i)" % (host, i, ntimestotry)
+		    try:
+#			ssh = paramiko.SSHClient()
+#			ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+			ssh.connect(host, username=user,key_filename=pkeylocation)
+			print "Connected to %s" % host
+			break
+		    except paramiko.AuthenticationException:
+			print "Authentication failed when connecting to %s" % host
+			sys.exit(1)
+		    except:
+			print "Could not SSH to %s, waiting for it to start" % host
+			i += 1
+			time.sleep(sleeptime)
+		    # If we could not connect within time limit
+		    if i == ntimestotry:
+			print "Could not connect to %s. Giving up" % host
+			sys.exit(1)
+		#
+		# SCP files over using paramiko protocol
+		#
+	    if files is not None:
+		scp = SCPClient(ssh.get_transport())
+		scp.put(files)
+		#scp.get('test2.txt')
+		scp.close
+		print "File has been transferred."
+	    if commands is not None:
+			# Send the command (non-blocking)
+		stdin, stdout, stderr = ssh.exec_command(commands)
+			# Wait for the command to terminate
+		while not stdout.channel.exit_status_ready():
+		    # Only print data if there is data to read in the channel
+		    if stdout.channel.recv_ready():
+			rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
+			if len(rl) > 0:
+			    # Print data from stdout
+			    print stdout.channel.recv(1024),
+		print "Command done, closing SSH connection"
+	    #
+	    # Disconnect from the host
+	    #
+	    print "Closing SSH connection"
+            ssh.close()
 
-	# Send the command (non-blocking)
-	stdin, stdout, stderr = ssh.exec_command(commands)
-
-	# Wait for the command to terminate
-	while not stdout.channel.exit_status_ready():
-    # Only print data if there is data to read in the channel
-    if stdout.channel.recv_ready():
-        rl, wl, xl = select.select([stdout.channel], [], [], 0.0)
-        if len(rl) > 0:
-            # Print data from stdout
-            print stdout.channel.recv(1024),
-    #
-    # Disconnect from the host
-    #
-    print "Command done, closing SSH connection"
-    ssh.close() 
-
+#SSH(hosts=['172.24.4.200','172.24.4.199','172.24.4.198'], user='ubuntu', pkeylocation='aaa112.pem', key=None, files=None, commands=None)
 
 def ansible(hostsfile, deployment):
     print "Ansible"
     if deployment == "openmpi":
         deploy = "scripts/openMPI/OpenMPI.yml"
-    cmds = "sudo apt-get -y install ansible; ansible-playbook -i %s %s" % (hostsfile, deploy)
+    cmds = "sudo apt-get update; sudo apt-get -y install ansible; ansible-playbook -i %s %s" % (hostsfile, deploy)
     print cmds
-    call([cmds])
+    return cmds
 
 def database(option, nProject=None, InstanceName=None,
              InstanceID=None, ExternalIP=None, UserID=None, SSHKey=None):

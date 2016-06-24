@@ -16,7 +16,8 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 #
-- hosts: testgroup
+#- hosts: testgroup
+- hosts: all
   user: ubuntu
   become: yes
   vars:
@@ -33,7 +34,7 @@
       - latest
 
   - name: Install required packages ...
-    apt: name={{ item }} state=present
+    apt: name={{ item }} state=present install_recommends=yes force=yes
     with_items:
      - build-essential
      - python-dev
