@@ -81,6 +81,7 @@ if (!filter_var($FlavorSize, FILTER_VALIDATE_INT)) {
 // Sanatize 
 function test_input($data)
 {
+    $data = filter_var($data, FILTER_SANITIZE_STRING);
     $data = trim($data);
     $data = stripslashes($data);
     $data = htmlspecialchars($data);
