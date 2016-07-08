@@ -2,17 +2,21 @@
 This is a website that is designed to work in conjunction with OpenStack as a simplified hypervisor for an end user.  It is designed to be deployed on the controller node. Once deployed this software will deploy a new project, new user, keypair, and networking. Once the infrastructure is deployed, the software will be deployed.  Essentially this is akin to HEAT however, due to the nature of ansible, can be deployed upon any environment once the infrastructure is deployed. 
 
 ##Word of Caution. 
-This project is still in development.  I will indicate what is functional below:
+This project is still in development.  Minimal security is deployed so this should be used only for development, not production.  I will indicate what is functional below:
 Website:
 - Infrastructure is completely functional including:
  - Project & user creation
  - Keypair creation
  - Networking creation
  - Subnet creation
- - router creation
+ - Router creation
  - linkage between subnet, router, and world
+ - Allocate floating IP's
  - spawning n instances
- 
+ - Updating Security Groups (to allow for SSH)
+ - Verify SSH is working
+ - SSH Access to Instances
+ - Execute commands through SSH
 
 Cloudrain.py
 - All functions work properly.
@@ -23,7 +27,7 @@ Cloudrain.py
 * Ansible
 
 ##How to deploy?
-* In openstack, create a m1.xlarge instance and use [my cloud-init script](https://github.com/JamesOBenson/cloud-init) to deploy a new liberty devstack instance with neutron.
+* In openstack, create a m1.xlarge instance and use [my cloud-init script](https://github.com/JamesOBenson/cloud-init/blob/master/cloud-init-devstack-stable-liberty_neutron-www-enabled.sh) to deploy a new liberty devstack instance with neutron and check that it is www-enabled.
 * git clone https://github.com/JamesOBenson/Cloud-RAIN.git
 * ./deploy.sh deploy_all
 * Update /var/www/Cloud-rain/cloudrain.py with openstack credentials (will be updated in the future) and externalGateway ID (Shown in Figure 1)
