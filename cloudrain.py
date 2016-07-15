@@ -189,13 +189,21 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user, password,
     no_of_inst = int(no_of_inst)
     cur_time = time.strftime('%y%m%d-%H%M%S', time.localtime())
     nicsInfo = [{'net-id':networkID}]
+
+    userdatacmd="#!/bin/bash " \
+                " \n echo 127.0.0.1 localhost $HOSTNAME >> /etc/hosts \n " \
+                " apt-get -qqy update \n " \
+                " apt-get -qqy install python-pip ansible git " \
+                " \n echo StrictHostKeyChecking no >> /etc/ssh/ssh_config"
+
     for n in range(0, no_of_inst):
         name_vars = [str(n), '-', cur_time]
         server_name = ''.join(name_vars)
         nt2 = Login(user, password, tenant, authURL)
         try:
             instance = nt2.servers.create(server_name, flavor=myfl,
-                                          image=myim, key_name=mykey, nics=nicsInfo)
+                                          image=myim, key_name=mykey, nics=nicsInfo,
+                                          userdata=userdatacmd)
             print("Info: Server", server_name, " created.")
         except:
             print "ERROR: Cannot create server(s)"
@@ -224,6 +232,9 @@ def CreateInstances(no_of_inst, myfl, myim, mykey, networkID, user, password,
         nhosts = f.read().splitlines()
     hosts = [str(host) for host in nhosts]
     SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files=None,commands=None)
+    SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files='tmp/'+user+'.pem',commands=None)
+    SETUPSSH="sudo cp %s.pem ~/.ssh/id_rsa; sudo chmod 600 ~/.ssh/id_rsa; chown whoami:whoami ~/.ssh/id_rsa" % (user)
+    SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files=None,commands=SETUPSSH)
     SSH(hosts=hosts,user='ubuntu',pkeylocation='tmp/'+user+'.pem',key=None,files=str(nProject),commands=None)
     
 
