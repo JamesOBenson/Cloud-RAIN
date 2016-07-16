@@ -78,7 +78,7 @@ if (!filter_var($FlavorSize, FILTER_VALIDATE_INT)) {
     $setError = TRUE;
 }
 
-// Sanatize 
+// Sanitize 
 function test_input($data)
 {
     $data = filter_var($data, FILTER_SANITIZE_STRING);
