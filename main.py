@@ -24,20 +24,20 @@ To execute: python main.py
 import pymysql
 import cloudrain
 
-cnx = pymysql.connect(user='root',
+CNX = pymysql.connect(user='root',
                       password="password",
                       host='localhost',
                       unix_socket="/var/run/mysqld/mysqld.sock",
                       port=3307,
                       db='Cloud')
 
-cursor = cnx.cursor()
+CURSOR = CNX.cursor()
 
 query = ("SELECT * FROM BigTable ORDER BY TIMESTAMP DESC LIMIT 1")
 
-cursor.execute(query)
+CURSOR.execute(query)
 
-for ProjectID in cursor:
+for ProjectID in CURSOR:
 #    print(ProjectID[0], ProjectID[1], ProjectID[2],ProjectID[3],
 #          ProjectID[4], ProjectID[5], ProjectID[6], ProjectID[7],
 #          ProjectID[8], ProjectID[9], ProjectID[10], ProjectID[11],
@@ -122,7 +122,9 @@ else:
 ####################
 FL = cloudrain.flavor(FlavorSize)
 #IM = cloudrain.image(Platform_name)
-instanceID = cloudrain.CreateInstances(nInstance, FL, Platform_ID, UserID, networkID, UserID, UserIDPass, UserID, nProject=nProject)
+instanceID = cloudrain.CreateInstances(nInstance, FL, Platform_ID, UserID,
+                                       networkID, UserID, UserIDPass, UserID,
+                                       nProject=nProject)
 
 
 AnsibleScript = """
@@ -171,8 +173,8 @@ text_file.write(AnsibleScript)
 text_file.close()
 
 
-cursor.close()
-cnx.close()
+CURSOR.close()
+CNX.close()
 
 #project.project()
 #os.system("ansible-playbook "+FileName+" --ask-pass")
